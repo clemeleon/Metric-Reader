@@ -9,8 +9,11 @@ export class User {
 
     public posts: Post[] = [];
 
-    constructor({ from_id, from_name }: UserType) {
+    public readonly page: number;
+
+    constructor({ from_id, from_name }: UserType, page: number) {
         this.id = from_id;
         this.name = from_name;
+        this.page = page;
     }
 }

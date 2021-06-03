@@ -1,6 +1,8 @@
 import { Pair } from "../components/Store";
 
 export class Access {
+    private caches: Pair<any>[] = [];
+
     private readonly base: string;
 
     private options: Pair<object | string> = {
@@ -15,6 +17,12 @@ export class Access {
     }
 
     public async get<R extends Object>(path: RequestInfo, params: Pair<string>): Promise<R> {
+        /*if (path === '/posts') {
+            const data = this.getCache(params);
+            if (data) {
+                return data as R;
+            }
+        }*/
         const url = `${this.base}${path}`,
             body = new URLSearchParams(params).toString(),
             options = { ...this.options, method: "GET", body };
@@ -35,4 +43,9 @@ export class Access {
         }
         return (await res.json()) as R;
     }
+
+    /*private getCache({page}: Pair<string>): R {
+        const index = parseInt(page) - 1;
+        this.caches.find())
+    }*/
 }

@@ -1,22 +1,25 @@
 type TokenType = {
-    client_id?: string;
+    client_id: string;
     email: string;
     sl_token: string;
 };
 
 export class Token {
-    private readonly id: string;
+    private id: string;
 
-    private readonly email: string;
+    public readonly email: string;
 
     public token: string;
 
+    public readonly name: string;
+
     public date: Date;
 
-    constructor({ client_id, email, sl_token }: TokenType) {
-        this.id = client_id && client_id.length > 0 ? client_id : "ju16a6m81mhid5ue1z3v2g0uh";
+    constructor(name: string, email: string) {
+        this.id = "ju16a6m81mhid5ue1z3v2g0uh";
         this.email = email;
-        this.token = sl_token;
+        this.name = name;
+        this.token = "";
         this.date = new Date();
     }
 
@@ -35,10 +38,11 @@ export class Token {
         return `sl_token=${this.token}`;
     }
 
-    public setToken(token: string): boolean {
-        if (this.token !== token && token.length > 0) {
-            this.token = token;
+    public setToken({ client_id, sl_token, email }: TokenType): boolean {
+        if (this.token !== sl_token && sl_token.length > 0 && email === this.email) {
+            this.token = sl_token;
             this.date = new Date();
+            this.id = client_id;
             return true;
         }
         return false;
