@@ -1,0 +1,140 @@
+//prefixes(one, 1, webkit moz)
+=prefix($property, $value, $prefixes: $prefixList)
+    @each $prefix in $prefixes
+        #{'-' + $prefix + '-' + $property}: $value
+    #{$property}: $value
+
+//prefixes((one:1, two:2), webkit moz)
+=prefixes($declarations, $prefixes: $prefixList)
+    @each $property, $value in $declarations
+        +prefix($property, $value, $prefixes)
+
+=media($size: 320px, $max: false)
+    @if $max == false
+        @media screen and (min-width: '#{$size}')
+            @content
+    @else
+        @media screen and (max-width: '#{$size}')
+            @content
+
+=calc($property, $value, $prefixes: $prefixList)
+    @each $prefix in $prefixes
+        #{$property}: #{'-' + $prefix + '-' + calc(#{$value})}
+    #{$property}: #{calc(#{$value})}
+
+=background-size($value, $prefixes: $prefixList)
+    +prefix(background-size, $value, $prefixes)
+
+=flexbox($prefixes: $prefixList)
+    @each $prefix in $prefixes
+        display: #{'-' + $prefix + '-flex'}
+    display: flex
+
+=transition($value, $prefixes: $prefixList)
+    +prefix(transition, $value, $prefixes)
+
+=transform($value, $prefixes: $prefixList)
+    +prefix(transform, $value, $prefixes)
+
+=animation($name, $duration, $timing, $type, $prefixes: $prefixList)
+    +prefix(animation, #{$name $duration $timing $type}, $prefixes)
+
+=delay($value, $prefixes: $prefixList)
+    +prefix(animation, #{$value}, $prefixes)
+
+=svg($source, $extension: null)
+    @if $extension != null
+        background: url('#{$source}.#{$extension}')
+    background: none, url('#{$source}.svg')
+
+=rgba($property, $color, $opacity: 0.5)
+    #{$property}: $color
+    #{$property}: rgba($color, $opacity)
+
+=font-size($size: 12)
+    font-size: $size + px
+    font-size: (0.0625 * $size) + rem
+
+=line-height($line: 20)
+    line-height: $line + px
+    line-height: (0.0625 * $line) + rem
+
+=font-and-line($size: 12, $line: 20)
+    +font-size($size)
+    +line-height($line)
+
+@function strip-unit($value)
+    @return $value / ($value * 0 + 1)
+
+
+=fluid-type($min-vw, $max-vw, $min-font-size, $max-font-size)
+    $u1: unit($min-vw)
+    $u2: unit($max-vw)
+    $u3: unit($min-font-size)
+    $u4: unit($max-font-size)
+
+    @if $u1 == $u2 and $u1 == $u3 and $u1 == $u4
+        &
+            font-size: $min-font-size
+            @media screen and (min-width: $min-vw)
+                font-size: calc(#{$min-font-size} + #{strip-unit($max-font-size - $min-font-size)} * ((100vw - #{$min-vw}) / #{strip-unit($max-vw - $min-vw)}))
+
+            @media screen and (min-width: $max-vw)
+                font-size: $max-font-size
+
+
+
+
+//@param vertical | horizontal | both
+=center($pos: both)
+    position: absolute
+    @if $pos == 'vertical'
+        top: 50%
+        +transform(translateY(-50%))
+    @else if $pos == 'horizontal'
+        left: 50%
+        +transform(translateX(-50%))
+    @else
+        top: 50%
+        left: 50%
+        +transform(translate(-50%, 50%))
+
+
+=key-frames($name)
+    @-webkit-keyframes #{$name}
+        @content
+    @-moz-keyframes #{$name}
+        @content
+    @-ms-keyframes #{$name}
+        @content
+    @-o-keyframes #{$name}
+        @content
+    @keyframes #{$name}
+        @content
+
+=show()
+    visibility: visible
+    opacity: 1
+    +prefix(transition-delay, 0s)
+
+=hide()
+    visibility: hidden
+    opacity: 0
+    +transition(visibility 0s linear 0.5s, opacity 0.5s linear)
+=btn()
+    cursor: pointer
+    //font-size: 24px
+    padding: 0.4em 0.3em
+    background-color: $btn
+    color: $white
+    text-transform: capitalize
+    width: 100%
+    border: 0
+    font-weight: normal
+    &:focus
+        border: 1px solid $border
+        outline: 0
+    &:hover
+        opacity: .9
+    +media(600px)
+        margin: 1px
