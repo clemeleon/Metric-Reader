@@ -1,7 +1,15 @@
-type TokenType = {
+export type TokenType = {
     client_id: string;
     email: string;
     sl_token: string;
+};
+
+export type TokenData = {
+    date?: string;
+    email: string;
+    id: string;
+    name: string;
+    token: string;
 };
 
 export class Token {
@@ -15,27 +23,33 @@ export class Token {
 
     public date: Date;
 
-    constructor(name: string, email: string) {
-        this.id = "ju16a6m81mhid5ue1z3v2g0uh";
+    constructor({ name, email, id = "", date, token = "" }: TokenData) {
+        this.id = id.length > 0 ? id : "ju16a6m81mhid5ue1z3v2g0uh";
         this.email = email;
         this.name = name;
-        this.token = "";
-        this.date = new Date();
+        this.token = token;
+        if (date) {
+            this.date = new Date(date);
+        } else {
+            const d = new Date();
+            d.setHours(d.getHours() - 2);
+            this.date = d;
+        }
     }
 
-    getAll(): TokenType {
+    getAll(): { client_id: string; email: string; name: string } {
         return {
             client_id: this.id,
             email: this.email,
-            sl_token: this.token,
+            name: this.name,
         };
     }
 
     /**
      * Token for fetching list of posts
      */
-    public getToken(): string {
-        return `sl_token=${this.token}`;
+    public getToken(): { sl_token: string } {
+        return { sl_token: this.token };
     }
 
     public setToken({ client_id, sl_token, email }: TokenType): boolean {
@@ -48,7 +62,10 @@ export class Token {
         return false;
     }
 
-    public renew(): boolean {
-        return this.date.getTime() - new Date().getTime() > 60 * 60 * 1000;
+    public expired(): boolean {
+        const hour = 60 * 60 * 1000,
+            old = this.date.getTime(),
+            now = new Date().getTime();
+        return now - old > hour;
     }
 }

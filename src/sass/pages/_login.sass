@@ -1,0 +1,30 @@
+@import "../helpers/helper"
+main.login
+    form
+        +flexbox()
+        flex-direction: column
+        width: 40%
+        justify-content: center
+        align-items: center
+        @extend %card
+        padding: 40px 20px
+        min-width: 300px
+
+        .btn
+            +flexbox()
+            justify-content: flex-end
+            min-width: 250px
+            max-width: 300px
+
+        input
+            border: 1px solid $border
+            padding: 10px 20px
+            margin-bottom: 15px
+            outline-color: $border
+            min-width: 250px
+            max-width: 300px
+        button
+            @extend %btn
+            width: 100px
+            padding: 10px 20px
+            background-color: $border

@@ -1,0 +1,41 @@
+@import "../helpers/helper"
+html, body, #root, .app
+    width: 100%
+    min-width: 320px
+    overflow-x: hidden
+    min-height: 100vh
+    background-color: #fff
+
+html
+    +font-size($base-size)
+    +media(400px)
+        +font-size($base-size + 1)
+    +media(650px)
+        +font-size($base-size + 2)
+    +media(950px)
+        +font-size($base-size + 4)
+    +media(1250px)
+        +font-size($base-size + 6)
+    body
+        color: $color-666
+        p
+            +font-size(16)
+    .app
+        header, footer
+            height: 80px
+            max-width: 1300px
+            margin: 0 auto
+
+        .container
+            min-width: 320px
+            max-width: 1300px
+            margin: 0 auto
+            width: 95%
+            padding: 10px
+            +calc(min-height, '100vh - 180px')
+            overflow-x: hidden
+            &.center
+                +flexbox()
+                justify-content: center
+                align-items: center
+                text-align: center

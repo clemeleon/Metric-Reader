@@ -6,3 +6,45 @@
     +hide()
 %btn
     +btn()
+
+%card
+    border: 1px solid rgba(0,0,0,.1)
+    box-shadow: 1px 0 12px rgba(0,0,0,.13)
+
+%accordion
+    +flexbox()
+    flex-direction: column
+    width: 100%
+    .panel-body
+        width: 100%
+        overflow: hidden
+        margin-bottom: 1px
+        &.active
+            .content
+                @extend %show
+                height: auto
+                padding: 5px
+        .label
+            width: 100%
+            height: 50px
+            button
+                @extend %btn
+                @extend %card
+                background-color: $border
+                color: black
+                height: 100%
+                +flexbox()
+                justify-content: space-between
+                align-items: center
+                padding: 10px
+                flex-direction: column
+                +media(720px)
+                    flex-direction: row
+                span
+                    +font-size(15)
+                    display: block
+                    font-weight: bold
+        .content
+            border: 0
+            @extend %hide
+            height: 0

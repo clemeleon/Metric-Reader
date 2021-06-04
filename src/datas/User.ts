@@ -1,19 +1,31 @@
-import { Post } from "./Post";
+import { slug } from "../helpers/helper";
 
 export type UserType = { from_id: string; from_name: string };
 
 export class User {
-    public id: string;
+    public readonly id: string;
 
-    public name: string;
+    public readonly name: string;
 
-    public posts: Post[] = [];
+    public count: number = 0;
 
-    public readonly page: number;
+    public readonly slug: string;
 
-    constructor({ from_id, from_name }: UserType, page: number) {
+    constructor({ from_id, from_name }: UserType) {
         this.id = from_id;
         this.name = from_name;
-        this.page = page;
+        this.slug = slug(from_name);
+    }
+
+    public plus(): void {
+        const count = this.count;
+        this.count = count + 1;
+    }
+
+    public minus(): void {
+        const count = this.count - 1;
+        if (count > -1) {
+            this.count = count;
+        }
     }
 }
