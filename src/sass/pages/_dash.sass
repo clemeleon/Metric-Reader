@@ -1,14 +1,43 @@
 @import "../helpers/helper"
 
 main.dash
+    .top
+        width: 100%
+        height: 40px
+        margin-bottom: 14px
+        +flexbox()
+        flex-direction: row
+        justify-content: space-between
+        > *
+            margin: 0 5px
+        input
+            @extend %input
+        button
+            @extend %btn
+            padding: 10px 20px
+        .pagination
+            +flexbox()
+            flex-direction: row
+            justify-content: space-between
+            align-items: center
+            span
+                font-weight: bold
+                +font-size(20)
+            > *
+                margin: 0 5px
     .list
         +flexbox()
         width: 100%
         justify-content: space-between
+        min-height: 300px
         .users
             width: 30%
             +flexbox()
             flex-direction: column
+            position: relative
+            .center
+                +center(both)
+                +font-size(20)
             .user
                 width: 100%
                 @extend %card
@@ -42,6 +71,10 @@ main.dash
             @extend %card
             .accordion
                 @extend %accordion
+            position: relative
+            .center
+                +center(both)
+                +font-size(20)
 
             //.post
                 @extend %card

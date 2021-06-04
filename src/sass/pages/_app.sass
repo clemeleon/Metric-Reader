@@ -25,6 +25,13 @@ html
             height: 80px
             max-width: 1300px
             margin: 0 auto
+            +flexbox()
+            justify-content: flex-end
+            align-items: center
+            button
+                @extend %btn
+                max-width: 100px
+                height: 40px
 
         .container
             min-width: 320px

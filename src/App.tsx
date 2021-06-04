@@ -1,10 +1,11 @@
 import React from "react";
 import { Login } from "./pages/Login";
-import { StoreContext } from "./components/Store";
+import { StoreContext, StoreItem } from "./components/Store";
 import { Token } from "./datas/Token";
 import { Dashboard } from "./pages/Dashboard";
 import { Loading } from "./components/MixComponent";
 import { BrowserRouter as Router, Switch, Route, match, Redirect } from "react-router-dom";
+import { log } from "util";
 
 export type DashParams = { slug?: string };
 export type RouteParams = { match: match<DashParams> };
@@ -21,13 +22,20 @@ class App extends React.Component {
         return <Redirect to={"/"} />;
     }
 
+    private logout = (): void => {
+        const { logout }: StoreItem = this.context;
+        if (logout) {
+            logout();
+        }
+    };
+
     render() {
         const { admin, loading } = this.context,
             on = admin instanceof Token;
         return (
             <div className="app">
                 <header className="header">
-                    <div>cool</div>
+                    {on ? <button onClick={() => this.logout()}>Logout</button> : ""}
                 </header>
                 {loading ? (
                     <Loading />

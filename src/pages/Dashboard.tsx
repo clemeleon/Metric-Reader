@@ -1,10 +1,8 @@
 import React, { Component } from "react";
-import { StoreContext, StoreItem, StoreState } from "../components/Store";
-import { Token } from "../datas/Token";
+import { StoreContext, StoreItem } from "../components/Store";
 import { User } from "../datas/User";
 import { Post } from "../datas/Post";
-import { Loading, PostItem, UserItem } from "../components/MixComponent";
-import { PanelProps } from "../components/accordion/Panel";
+import { PostItem, UserItem } from "../components/MixComponent";
 import { Accordion, AccPanel } from "../components/accordion/Accordion";
 
 interface DashState {}
@@ -13,86 +11,127 @@ type DashProp = {
     slug?: string;
 };
 
+interface Filter {
+    users: User[];
+    posts: Post[];
+    mark: string;
+    order: boolean;
+    page: number;
+}
+
 export class Dashboard extends Component<DashProp, DashState> {
     private loaded: boolean = false;
     public static contextType = StoreContext;
 
-    /*private async filter(page: number = 1): Promise<void> {
-        this.setState({ more: true });
-        let user: User | undefined = undefined,
-            { load, users, posts } = this.context,
-            { searchUser, searchPost } = this.state,
-            { id = "" } = this.props;
-        await load(page);
-        if (id.length > 0) {
-            user = users.find((u: User) => u.id === id);
-        }
-        const filterUsers = users.filter((u: User) => {
-            return searchUser.length === 0 || u.name.includes(searchUser);
-        });
-        let filterPosts: Post[] = posts.filter((p: Post) => {
-            return searchPost.length === 0 || p.message.includes(searchPost);
-        });
-        if (user) {
-            filterPosts = filterPosts.filter((p) => {
-                return user && p.owner === user.id;
-            });
-        }
-        filterPosts = filterPosts.filter((p) => {
-            return p.page <= page;
-        });
-        this.setState({ user, users: filterUsers, posts: filterPosts, more: false, page });
-    }*/
-
     public componentDidMount(): void {
-        const { load, posts }: StoreItem = this.context;
+        const { posts }: StoreItem = this.context;
         if (posts.length === 0) {
-            if (load) {
-                console.log("jj");
-                load(1).then();
-            }
+            this.fetch(1);
         }
     }
 
-    private filter(): { users: User[]; posts: Post[]; mark: string } {
-        const datas: { users: User[]; posts: Post[]; mark: string } = {
+    private fetch = (page: number, fetch: boolean = true): void => {
+        const { load, dispatch }: StoreItem = this.context;
+        if (load && dispatch) {
+            if (fetch) {
+                load(page).then();
+            } else {
+                dispatch({ page });
+            }
+        }
+    };
+
+    private sortByDate = (sort: boolean): void => {
+        const { dispatch }: StoreItem = this.context;
+        if (dispatch) {
+            dispatch({ order: !sort });
+        }
+    };
+
+    private filterUser = (target: EventTarget): void => {
+        const { dispatch }: StoreItem = this.context;
+        if (dispatch && target instanceof HTMLInputElement) {
+            const val = target.value.trim();
+            dispatch({ user: val });
+        }
+    };
+
+    private filterPost = (target: EventTarget): void => {
+        const { dispatch }: StoreItem = this.context;
+        if (dispatch && target instanceof HTMLInputElement) {
+            const val = target.value.trim();
+            dispatch({ post: val });
+        }
+    };
+
+    private filter(): Filter {
+        const datas: Filter = {
                 users: [],
                 posts: [],
                 mark: "",
+                order: true,
+                page: 1,
             },
-            { loading, filters, posts, users }: StoreItem = this.context,
-            { user, post, page } = filters,
+            {
+                loading,
+                posts,
+                users,
+                user = "",
+                post = "",
+                page = 1,
+                order = false,
+            }: StoreItem = this.context,
             { slug = "" } = this.props;
         if (loading) {
             return datas;
         }
         if (slug.length > 0) {
             const uFind = users.find((u: User) => u.slug === slug);
-            console.log(slug);
             if (uFind) {
                 datas.mark = uFind.id;
             }
         }
         datas.users = users.filter((u: User) => {
-            return user.length === 0 || u.name.includes(user);
+            u.clear();
+            return user.length === 0 || u.name.toLowerCase().includes(user.toLowerCase());
         });
-        datas.posts = posts.filter((p: Post) => {
-            return post.length === 0 || p.message.includes(post);
-        });
-        if (datas.mark) {
+
+        if (datas.mark && datas.users.length > 0) {
+            datas.posts = posts.filter((p: Post) => {
+                return post.length === 0 || p.message.toLowerCase().includes(post.toLowerCase());
+            });
             datas.posts = datas.posts.filter((p) => {
                 return p.owner === datas.mark;
             });
+            datas.posts = datas.posts.filter((p) => {
+                return p.page === page;
+            });
+            datas.posts = order
+                ? datas.posts.sort((a, b) => a.created.getTime() - b.created.getTime())
+                : datas.posts.sort((a, b) => b.created.getTime() - a.created.getTime());
         }
-        datas.posts = datas.posts.filter((p) => {
-            return p.page <= page;
+        posts.forEach((p) => {
+            const bol = p.page === page;
+            if (bol) {
+                for (const u of datas.users) {
+                    if (u.id === p.owner) {
+                        u.plus();
+                        break;
+                    }
+                }
+            }
+            return bol;
         });
+        datas.order = order;
+        datas.page = page;
+        datas.users.sort((a, b) => a.name.localeCompare(b.name));
+
         return datas;
     }
 
     public render() {
-        const { users, posts, mark } = this.filter(),
-            more = users.length === 0 && posts.length === 0,
+        const { users, posts, mark, order, page } = this.filter(),
+            sort = order ? "ASC" : "DESC",
             panels: AccPanel[] = posts.map((p) => {
                 return {
                     label: (
@@ -112,23 +151,58 @@ export class Dashboard extends Component<DashProp, DashState> {
             });
         return (
             <main className={"container dash"}>
-                {more ? (
-                    <Loading center={more} mgs={"Loading more items!"} />
-                ) : (
-                    <div className={"list"}>
-                        <div className={"users"}>
-                            {users.map((u: User) => (
-                                <UserItem id={mark} user={u} key={u.id} />
-                            ))}
+                <div className={"area"}>
+                    <div className={"top"}>
+                        <div>
+                            <input
+                                onKeyUp={(e) => this.filterUser(e.target)}
+                                placeholder={"Search users"}
+                            />
                         </div>
-                        <div className={"posts"}>
-                            {/*{posts.map((p: Post) => (*/}
-                            {/*    <PostItem post={p} key={p.id} />*/}
-                            {/*))}*/}
-                            <Accordion multiple={false} panels={panels} />
+                        <div>
+                            <button
+                                disabled={posts.length === 0}
+                                onClick={() => this.sortByDate(order)}
+                            >
+                                {sort}
+                            </button>
+                        </div>
+                        <div>
+                            <input
+                                onKeyUp={(e) => this.filterPost(e.target)}
+                                placeholder={"Search posts"}
+                            />
+                        </div>
+                        <div className={"pagination"}>
+                            <button
+                                disabled={page <= 1}
+                                onClick={() => this.fetch(page - 1, false)}
+                            >
+                                Previous
+                            </button>
+                            <span>{page}</span>
+                            <button onClick={() => this.fetch(page + 1)}>Next</button>
                         </div>
                     </div>
-                )}
+                    <div className={"list"}>
+                        <div className={"users"}>
+                            {users.length === 0 ? (
+                                <div className={"center"}>No users found!</div>
+                            ) : (
+                                users.map((u: User) => <UserItem id={mark} user={u} key={u.id} />)
+                            )}
+                        </div>
+                        <div className={"posts"}>
+                            {panels.length > 0 ? (
+                                <Accordion multiple={false} panels={panels} />
+                            ) : (
+                                <div className={"center"}>
+                                    Click on any user from the left panel!
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
             </main>
         );
     }

@@ -13,11 +13,10 @@ export type StoreState = {
     users: User[];
     posts: Post[];
     loading: boolean;
-    filters: {
-        post: string;
-        user: string;
-        page: number;
-    };
+    post?: string;
+    user?: string;
+    page?: number;
+    order?: boolean;
 };
 
 export type StoreUser = { name: string; email: string };
@@ -28,7 +27,7 @@ export type StoreItem = {
     load?: (page: number) => Promise<void>;
     login?: (name: string, email: string) => void;
     logout?: () => void;
-    dispatch?: ({ state }: { state?: { [K in keyof StoreState]: any } }) => void;
+    dispatch?: (state: Pair<any>) => void;
 } & StoreState;
 
 const DefState: StoreState = {
@@ -36,7 +35,10 @@ const DefState: StoreState = {
         loading: true,
         users: [],
         posts: [],
-        filters: { post: "", user: "", page: 1 },
+        post: "",
+        user: "",
+        page: 1,
+        order: true,
     },
     Context = createContext<StoreItem>(DefState),
     { Provider } = Context;
@@ -74,7 +76,6 @@ export class Store extends Component<{}, StoreState> {
         admin = admin ? admin : this.state.admin;
         if (admin) {
             if (admin.expired()) {
-                console.log("in");
                 const res = await this.access.post<{ data: TokenType }>(
                     "/register",
                     admin.getAll()
@@ -130,7 +131,10 @@ export class Store extends Component<{}, StoreState> {
                     posts.push(new Post(data, page));
                 }
             }
-            this.setState({ users, posts, loading: false });
+            this.setState({
+                ...this.state,
+                ...{ users, posts, loading: false, page },
+            });
         }
     }
 
@@ -140,21 +144,22 @@ export class Store extends Component<{}, StoreState> {
         if (posts.length < 100) {
             await this.fetchPosts(page);
         } else {
-            this.setState({ loading: false });
+            this.setState({ loading: false, page });
         }
     };
 
-    private dispatch = ({ state }: { state?: { [K in keyof StoreState]: any } }): void => {
+    private dispatch = (state: Pair<any>): void => {
         const states: { [K in keyof StoreState]?: any } = {};
         if (state) {
             const keys = Object.keys(state) as [keyof StoreState];
             for (const key of keys) {
+                const k = key as string;
                 if (!this.state.hasOwnProperty(key)) {
                     throw new Error(`${key} does not exist in state`);
                 } else if (this.excludes.includes(key)) {
                     throw new Error(`Can not set this ${key} from outside`);
                 }
-                states[key] = state[key];
+                states[key] = state[k];
             }
         }
         if (states && Object.keys(states).length > 0) {

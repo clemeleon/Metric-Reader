@@ -28,4 +28,8 @@ export class User {
             this.count = count;
         }
     }
+
+    public clear(): void {
+        this.count = 0;
+    }
 }

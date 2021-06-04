@@ -921,15 +921,9 @@ export class Access {
     }
 
     public async get<R extends Object>(path: RequestInfo, params: Pair<string>): Promise<R> {
-        if (path === "/posts") {
-            return this.dummy as R;
-        }
-        /*if (path === '/posts') {
-            const data = this.getCache(params);
-            if (data) {
-                return data as R;
-            }
-        }*/
+        // if (path === "/posts") {
+        //     return this.dummy as R;
+        // }
         const query = new URLSearchParams(params).toString(),
             url = `${this.base}${path}${query.length > 0 ? `?${query}` : ""}`,
             options = { ...this.options, method: "GET" };

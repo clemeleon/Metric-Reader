@@ -17,14 +17,10 @@ main.login
             max-width: 300px
 
         input
-            border: 1px solid $border
-            padding: 10px 20px
-            margin-bottom: 15px
-            outline-color: $border
-            min-width: 250px
-            max-width: 300px
+            @extend %input
         button
             @extend %btn
-            width: 100px
+            max-width: 100px
             padding: 10px 20px
+            height: 40px
             background-color: $border
