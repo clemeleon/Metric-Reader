@@ -19,15 +19,13 @@ export type StoreState = {
     order?: boolean;
 };
 
-export type StoreUser = { name: string; email: string };
-
 export type StorePost = { page: number; user?: User };
 
 export type StoreItem = {
     load?: (page: number) => Promise<void>;
     login?: (name: string, email: string) => void;
     logout?: () => void;
-    dispatch?: (state: Pair<any>) => void;
+    dispatch?: (state: Pair<string | number | boolean>) => void;
 } & StoreState;
 
 const DefState: StoreState = {
@@ -148,7 +146,7 @@ export class Store extends Component<{}, StoreState> {
         }
     };
 
-    private dispatch = (state: Pair<any>): void => {
+    private dispatch = (state: Pair<string | number | boolean>): void => {
         const states: { [K in keyof StoreState]?: any } = {};
         if (state) {
             const keys = Object.keys(state) as [keyof StoreState];

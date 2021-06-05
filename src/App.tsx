@@ -5,7 +5,6 @@ import { Token } from "./datas/Token";
 import { Dashboard } from "./pages/Dashboard";
 import { Loading } from "./components/MixComponent";
 import { BrowserRouter as Router, Switch, Route, match, Redirect } from "react-router-dom";
-import { log } from "util";
 
 export type DashParams = { slug?: string };
 export type RouteParams = { match: match<DashParams> };
@@ -50,7 +49,6 @@ class App extends React.Component {
                                 exact={true}
                                 render={(data: RouteParams) => this.verify(data, on)}
                             />
-                            {/*{on ? <Dashboard /> : <Redirect to={"/"} />}*/}
                         </Switch>
                     </Router>
                 )}
